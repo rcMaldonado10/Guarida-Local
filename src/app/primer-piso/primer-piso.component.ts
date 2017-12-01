@@ -25,9 +25,14 @@ export class PrimerPisoComponent {
 
   constructor(private reservasService: ReservasService, private authService: AuthService) {
     this.day = new Date().getDate().toString();
+    if (+(this.day) < 10) {
+      this.day = this.modifiedDay(this.day);
+    }
     this.month = +(new Date().getMonth().toString()) + 1;
     this.year = new Date().getFullYear().toString();
     this.date = this.year + '-' + this.month + '-' + this.day;
+
+    console.log(this.date);
 
     this.reservasService.getReservationsByDate(this.date).subscribe(reservas => {
     this.reservas = this.organizeByHour(reservas);
@@ -89,6 +94,40 @@ export class PrimerPisoComponent {
       }
     }
     return organizedReservations;
+  }
+
+  // Funcion que modifica el dia para que pueda encontrar reservas en la base de datos
+  modifiedDay(day) {
+    switch (day) {
+      case '1':
+        day = '01';
+        break;
+      case '2':
+        day = '02';
+        break;
+      case '3':
+        day = '03';
+        break;
+      case '4':
+        day = '04';
+        break;
+      case '5':
+        day = '05';
+        break;
+      case '6':
+        day = '06';
+        break;
+      case '7':
+        day = '07';
+        break;
+      case '8':
+        day = '08';
+        break;
+      case '9':
+        day = '09';
+        break;
+    }
+    return day;
   }
 
   onLogout() {

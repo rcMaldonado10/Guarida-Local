@@ -12,8 +12,8 @@ export class ReservasService {
         .map(res => res.json());
    }
 
-   getReservationsByEspecific(date, hourEntered, floor, room) {
-    return this.http.get('http://localhost:3000/reservas/' + date + '/' + hourEntered + '/' + floor + '/' + room)
+   getReservationsByEspecific(date, floor, room) {
+    return this.http.get('http://localhost:3000/reservas/' + date + '/' + floor + '/' + room)
       .map(res => res.json());
    }
   getReservationsByDate(date) {

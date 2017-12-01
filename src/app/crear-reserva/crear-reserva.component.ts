@@ -33,11 +33,22 @@ export class CrearReservaComponent implements OnInit {
   public resDate: string;
   admin = JSON.parse(localStorage.getItem('admin'));
 
+  private date; // su valor es la fecha de la computadora
+  private day; // el dia que tenga la computadora
+  private month; // el mes que tenga la computadora
+  private year; // el año que tenga la computadora
+
   constructor(private reservaService: ReservasService,
     private flashMessage: FlashMessagesService,
     private authService: AuthService) {
-    this.reservaService.getReservas().subscribe(reservations => {
+    this.day = new Date().getDate().toString();
+    this.month = +(new Date().getMonth().toString()) + 1;
+    this.year = new Date().getFullYear().toString();
+    this.date = this.year + '-' + this.month + '-' + this.day;
+
+    this.reservaService.getReservationsByDate(this.date).subscribe(reservations => {
       this.reservations = reservations;
+      console.log(this.reservations);
     });
   }
 
@@ -105,7 +116,7 @@ export class CrearReservaComponent implements OnInit {
         if (militaryTimeDiff ===  2) {
           diffMinutes = (+this.exitMinutes) - (+this.enteredMinutes) ;
           if (diffMinutes > 0) {
-            this.flashMessage.show('La reserva excede el limite de dos horas', {cssClass: 'alert-warning', timeout: 10000});
+            this.flashMessage.show('La reserva excede el limite de dos horas', {cssClass: 'alert-danger', timeout: 10000});
             allGoodFlagTime = false;
           } else {
             hourToEnter = startTimeMilitary + ':' + this.enteredMinutes;
@@ -121,7 +132,7 @@ export class CrearReservaComponent implements OnInit {
           hourToExit = endingTimeMilitary + ':' + this.exitMinutes;
           allGoodFlagTime = true;
         } else {
-          this.flashMessage.show('Por favor elige un tiempo de reseva valido', { cssClass: 'alert-danger', timeout: 5000 });
+          this.flashMessage.show('😑 Por favor elige un tiempo de reseva valido', { cssClass: 'alert-danger', timeout: 5000 });
           allGoodFlagTime = false;
         }
 
@@ -143,17 +154,21 @@ export class CrearReservaComponent implements OnInit {
           'piso': this.floorNumber
         };
 
-        this.reservaService.getReservationsByEspecific(reservation.fecha, reservation.horaEntrada, reservation.piso, reservation.numSalon)
+        this.reservaService.getReservationsByEspecific(reservation.fecha, reservation.piso, reservation.numSalon)
         .subscribe(res => {
+          let flag = false;
           this.reservationToCheck = res;
-          console.log(this.reservationToCheck);
+          for (let i = 0; i < this.reservationToCheck.length; i++ ) {
+            if (reservation.horaEntrada > this.reservationToCheck[i].horaSalida) {
+                flag = true;
+               console.log('Hora deseada: ' + reservation.horaEntrada + '-' + reservation.horaSalida);
+               console.log('Hora del Array: ' + this.reservationToCheck[i].horaEntrada + '-' this.reservationToCheck[i].horaSalida);
+            }
+          }
         });
 
         this.reservaService.addReserva(reservation)
           .subscribe(reserva => {
-            // if (this.reservationToCheck.horaEntrada !== reservation.horaEntrada) {
-
-            // }
             this.reservations.push(reserva);
           });
       this.flashMessage.show('Reserva Completada 🎉', { cssClass: 'alert-success', timeout: 5000 });
