@@ -17,11 +17,16 @@ export class RegisterAdminComponent implements OnInit {
   username: String;
   adminLevel: Number;
   adminPassword: String;
+  confirmAdminPassword: String;
 
   constructor(private validateService: ValidateService,
               private flashMessage: FlashMessagesService,
               private authService: AuthService,
-              private router: Router) { }
+              private router: Router) {
+                if (this.admin.adminLevel === '2') {
+                  this.onLogout();
+                }
+               }
 
   ngOnInit() {
   }
@@ -35,24 +40,31 @@ export class RegisterAdminComponent implements OnInit {
     };
 
     // Validate if all fields are filled
-    if (!this.validateService.validateAdmin(admin)) {
+    if (!this.validateService.validateAdmin(admin, this.confirmAdminPassword)) {
       this.flashMessage.show('Favor llenar todos los campos', { cssClass: 'alert-danger', timeout: 3000});
       return false;
     }
 
-    // Register the new Administrator
-    this.authService.registerAdmin(admin).subscribe(data => {
-      console.log(data.success);
-      if (data.success) {
-        this.flashMessage.show('El administrador ya esta registrado', { cssClass: 'alert-success', timeout: 3000 });
-        this.router.navigate(['/']);
-      } else {
-        this.flashMessage.show('Error al entar el administrador', { cssClass: 'alert-danger', timeout: 3000 });
-      }
-    });
+    if (admin.password === this.confirmAdminPassword) {
+      // Register the new Administrator
+      this.authService.registerAdmin(admin).subscribe(data => {
+        console.log(data.success);
+        if (data.success) {
+          this.flashMessage.show('El administrador ya esta registrado', { cssClass: 'alert-success', timeout: 3000 });
+          this.router.navigate(['/']);
+        } else {
+          this.flashMessage.show('Error al entar el administrador', { cssClass: 'alert-danger', timeout: 3000 });
+        }
+      });
+    } else {
+      this.flashMessage.show('Las contraseñas entradas no son iguales', {cssClass: 'alert-danger', timeout: 5000});
+    }
   }
 
   onLogout() {
     this.authService.logout();
+    if (this.admin.adminLevel === '2') {
+      this.router.navigate(['/']);
+    }
   }
 }

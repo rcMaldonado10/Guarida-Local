@@ -27,7 +27,7 @@ sera enviada a la base de datos, en la colección llamada reservas.
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand">La Guarida 🐺</a>
+        <a class="navbar-brand">La Guarida</a>
       </div>
 
       <!-- Collect the nav links, forms, and other content for toggling -->
@@ -96,6 +96,14 @@ sera enviada a la base de datos, en la colección llamada reservas.
                     style="margin-bottom: 10px" type="password" />
                 </div>
               </div>
+                <div class="form-group required">
+                  <!-- Input que acepta el ID de un estudiante  -->
+                  <label class="control-label col-md-4  requiredField">Confirmar contraseña del administrador</label>
+                  <div class="controls col-md-8 ">
+                    <input class="input-md  textinput textInput form-control" maxlength="30" name="confirmAdminPassword" [(ngModel)]="confirmAdminPassword"
+                      placeholder="Confirme la contraseña del administrador" style="margin-bottom: 10px" type="password" />
+                  </div>
+                </div>
               <div class="form-group">
                 <div class="aab controls col-md-4 "></div>
                 <div class="controls col-md-8 ">
