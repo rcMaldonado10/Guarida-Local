@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ReservasService } from '../services/reservas/reservas.service';
 import { Reservas } from '../../Reservas';
 import { AuthService } from '../services/auth/auth.service';
+import { FlashMessagesService } from 'angular2-flash-messages';
 
 @Component({
   selector: 'app-primer-piso',
@@ -23,19 +24,25 @@ export class PrimerPisoComponent {
                                         'Hora de Salida', 'Cant. Est.', 'Piso', 'Salon', 'Fecha', 'Reserva'];
 
 
-  constructor(private reservasService: ReservasService, private authService: AuthService) {
-    this.day = new Date().getDate().toString();
+  constructor(private reservasService: ReservasService, private authService: AuthService, private flashMessage: FlashMessagesService) {
+    this.day = (new Date().getDate()).toString(); // Verifica la fecha que de el dia correcto el 4 de diciembre dio el 5.
+    console.log(this.day + 'sin editar');
     if (+(this.day) < 10) {
       this.day = this.modifiedDay(this.day);
     }
     this.month = +(new Date().getMonth().toString()) + 1;
     this.year = new Date().getFullYear().toString();
     this.date = this.year + '-' + this.month + '-' + this.day;
+    console.log(this.day);
 
     console.log(this.date);
 
     this.reservasService.getReservationsByDate(this.date).subscribe(reservas => {
-    this.reservas = this.organizeByHour(reservas);
+      this.reservas = this.organizeByHour(reservas);
+      if (this.reservas.length === undefined || this.reservas.length === 0) {
+        flashMessage.show('No hay reservas creadas por el momento.', { cssClass: 'alert-warning', timeout: 5000 });
+      }
+      console.log(this.reservas);
     });
   }
 
