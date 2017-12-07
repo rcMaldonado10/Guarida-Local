@@ -113,10 +113,10 @@ export class CrearReservaComponent implements OnInit {
 
         allGoodFlagTime = true;
         // Este if es para calcular los minutos cuando la diferencia de hora es dos.
-        if (militaryTimeDiff ===  2) {
-          diffMinutes = (+this.exitMinutes) - (+this.enteredMinutes) ;
+        if (militaryTimeDiff === 2) {
+          diffMinutes = (+this.exitMinutes) - (+this.enteredMinutes);
           if (diffMinutes > 0) {
-            this.flashMessage.show('La reserva excede el limite de dos horas', {cssClass: 'alert-danger', timeout: 10000});
+            this.flashMessage.show('La reserva excede el limite de dos horas', { cssClass: 'alert-danger', timeout: 10000 });
             allGoodFlagTime = false;
           } else {
             hourToEnter = startTimeMilitary + ':' + this.enteredMinutes;
@@ -132,12 +132,12 @@ export class CrearReservaComponent implements OnInit {
           hourToExit = endingTimeMilitary + ':' + this.exitMinutes;
           allGoodFlagTime = true;
         } else {
-          this.flashMessage.show('😑 Por favor elige un tiempo de reseva valido', { cssClass: 'alert-danger', timeout: 5000 });
+          this.flashMessage.show('😑  Por favor elige un tiempo de reseva valido', { cssClass: 'alert-danger', timeout: 5000 });
           allGoodFlagTime = false;
         }
 
       } else {
-        this.flashMessage.show('La hora entrada no cumple con el limite de dos horas', {cssClass: 'alert-danger', timeout: 5000});
+        this.flashMessage.show('La hora entrada no cumple con el limite de dos horas', { cssClass: 'alert-danger', timeout: 5000 });
       }
       if (allGoodFlagID === true && allGoodFlagQuantity === true && allGoodFlagTime === true) {
         const reservation = {
@@ -155,197 +155,121 @@ export class CrearReservaComponent implements OnInit {
         };
 
         this.reservaService.getReservationsByEspecific(reservation.fecha, reservation.piso, reservation.numSalon)
-        .subscribe(res => {
-          let flag = false;
-          this.reservationToCheck = res;
-          for (let i = 0; i < this.reservationToCheck.length; i++ ) {
-            if (reservation.horaEntrada > this.reservationToCheck[i].horaSalida) {
-                flag = true;
-               console.log('Hora deseada: ' + reservation.horaEntrada + '-' + reservation.horaSalida);
-               console.log('Hora del Array: ' + this.reservationToCheck[i].horaEntrada + '-' this.reservationToCheck[i].horaSalida);
-            }
-          }
-        });
-
+          .subscribe(res => {
+          });
         this.reservaService.addReserva(reservation)
           .subscribe(reserva => {
             this.reservations.push(reserva);
           });
-      this.flashMessage.show('Reserva Completada 🎉', { cssClass: 'alert-success', timeout: 5000 });
-    }
-  }
-}
-
-log() {
-  let allGoodFlagID: boolean;
-  let allGoodFlagQuantity: boolean;
-  const startTime = this.enteredHour + ' ' + this.enteredMeridiem;
-  const endingTime = this.exitHour + ' ' + this.exitMeridiem;
-  const startTimeMilitary = this.changeToMilitary(startTime);
-  const endingTimeMilitary = this.changeToMilitary(endingTime);
-
-  console.log(startTimeMilitary + '    ' + endingTimeMilitary);
-
-  if (this.id === undefined || this.name === undefined || this.department === undefined ||
-    this.quantityStudents === undefined || this.floorNumber === undefined ||
-    this.roomNumber === undefined || this.enteredHour === undefined || this.exitHour === undefined ||
-    this.resDate === undefined) {
-    this.flashMessage.show('Favor de llenar todos los campos.', { cssClass: 'alert-danger', timeout: 5000 });
-  } else {
-    const tempArray: String[] = [];
-    let idArray = '';
-    if (isNaN(+this.id)) {
-      for (let i = 0; i < this.id.length; i++) {
-        console.log('Estoy en el for');
-        tempArray.push(this.id.charAt(i));
-      }
-      console.log(tempArray);
-      for (let i = 0; i < tempArray.length; i++) {
-        if (false === isNaN(+tempArray[i])) {
-          idArray += tempArray[i];
-        }
-      }
-      console.log(idArray.length);
-      if (idArray.length === 9) {
-        this.id = idArray;
-        allGoodFlagID = true;
-      } else {
-        this.flashMessage.show('El numero estudiantil es incorrecto', { cssClass: 'alert-warning', timeout: 5000 });
-        allGoodFlagID = false;
+        this.flashMessage.show('Reserva Completada 🎉', { cssClass: 'alert-success', timeout: 5000 });
       }
     }
-    if (isNaN(this.quantityStudents)) {
-      this.flashMessage.show('La cantidad de estudiantes no es un número', { cssClass: 'alert-warning', timeout: 5000 });
-      allGoodFlagQuantity = false;
-    } else {
-      allGoodFlagQuantity = true;
-    }
-
-    if (allGoodFlagID === true && allGoodFlagQuantity === true) {
-      const reservation = {
-        'name': this.name,
-        'id': this.id,
-        'departamento': this.department,
-        'cantEstudiantes': this.quantityStudents,
-        'numSalon': this.roomNumber,
-        'horaEntrada': (this.enteredHour + ':' + this.enteredMinutes + ' ' + this.enteredMeridiem),
-        'horaSalida': (this.exitHour + ':' + this.exitMinutes + ' ' + this.exitMeridiem),
-        'fecha': this.resDate,
-        'status': 'Confirmar',
-        'style': 'btn btn-success',
-        'piso': this.floorNumber
-      };
-
-      this.flashMessage.show('Reserva Completada 🎉', { cssClass: 'alert-success', timeout: 5000 });
-      console.log(reservation);
-    }
   }
-}
 
-changeToMilitary(recivedHour) {
-  let militaryTime: string;
+  changeToMilitary(recivedHour) {
+    let militaryTime: string;
 
-  switch (recivedHour) {
-    case '12 AM':
-      militaryTime = '00';
-      break;
+    switch (recivedHour) {
+      case '12 AM':
+        militaryTime = '00';
+        break;
 
-    case '1 AM':
-      militaryTime = '01';
-      break;
+      case '1 AM':
+        militaryTime = '01';
+        break;
 
-    case '2 AM':
-      militaryTime = '02';
-      break;
+      case '2 AM':
+        militaryTime = '02';
+        break;
 
-    case '3 AM':
-      militaryTime = '03';
-      break;
+      case '3 AM':
+        militaryTime = '03';
+        break;
 
-    case '4 AM':
-      militaryTime = '04';
-      break;
+      case '4 AM':
+        militaryTime = '04';
+        break;
 
-    case '5 AM':
-      militaryTime = '05';
-      break;
+      case '5 AM':
+        militaryTime = '05';
+        break;
 
-    case '6 AM':
-      militaryTime = '06';
-      break;
+      case '6 AM':
+        militaryTime = '06';
+        break;
 
-    case '7 AM':
-      militaryTime = '07';
-      break;
+      case '7 AM':
+        militaryTime = '07';
+        break;
 
-    case '8 AM':
-      militaryTime = '08';
-      break;
+      case '8 AM':
+        militaryTime = '08';
+        break;
 
-    case '9 AM':
-      militaryTime = '09';
-      break;
+      case '9 AM':
+        militaryTime = '09';
+        break;
 
-    case '10 AM':
-      militaryTime = '10';
-      break;
+      case '10 AM':
+        militaryTime = '10';
+        break;
 
-    case '11 AM':
-      militaryTime = '11';
-      break;
+      case '11 AM':
+        militaryTime = '11';
+        break;
 
-    case '12 PM':
-      militaryTime = '12';
-      break;
+      case '12 PM':
+        militaryTime = '12';
+        break;
 
-    case '1 PM':
-      militaryTime = '13';
-      break;
+      case '1 PM':
+        militaryTime = '13';
+        break;
 
-    case '2 PM':
-      militaryTime = '14';
-      break;
+      case '2 PM':
+        militaryTime = '14';
+        break;
 
-    case '3 PM':
-      militaryTime = '15';
-      break;
+      case '3 PM':
+        militaryTime = '15';
+        break;
 
-    case '4 PM':
-      militaryTime = '16';
-      break;
+      case '4 PM':
+        militaryTime = '16';
+        break;
 
-    case '5 PM':
-      militaryTime = '17';
-      break;
+      case '5 PM':
+        militaryTime = '17';
+        break;
 
-    case '6 PM':
-      militaryTime = '18';
-      break;
+      case '6 PM':
+        militaryTime = '18';
+        break;
 
-    case '7 PM':
-      militaryTime = '19';
-      break;
+      case '7 PM':
+        militaryTime = '19';
+        break;
 
-    case '8 PM':
-      militaryTime = '20';
-      break;
+      case '8 PM':
+        militaryTime = '20';
+        break;
 
-    case '9 PM':
-      militaryTime = '21';
-      break;
+      case '9 PM':
+        militaryTime = '21';
+        break;
 
-    case '10 PM':
-      militaryTime = '22';
-      break;
+      case '10 PM':
+        militaryTime = '22';
+        break;
 
-    case '11 PM':
-      militaryTime = '23';
-      break;
+      case '11 PM':
+        militaryTime = '23';
+        break;
+    }
+    return militaryTime;
   }
-  return militaryTime;
-}
 
-onLogout() {
-  this.authService.logout();
-}
+  onLogout() {
+    this.authService.logout();
+  }
 }
