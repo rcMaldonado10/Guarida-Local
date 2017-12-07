@@ -26,14 +26,18 @@ export class LogInComponent {
       password: this.password
     };
 
-    this.authService.authenticateAdmin(admin).subscribe(data => {
-      if (data.success) {
-        this.authService.storeAdminData(data.token, data.admin);
-        this.router.navigate(['/app-primer-piso']);
-      } else {
-        this.flashMessage.show('Verifique que la información entrada sea correcta', {cssClass: 'alert-danger', timeout: 5000});
-        this.router.navigate(['/']);
-      }
-    });
+    if (admin.username === undefined || admin.password === undefined) {
+      this.flashMessage.show('Favor de llenar todos los campos', { cssClass: 'alert-danger', timeout: 5000});
+    }else {
+      this.authService.authenticateAdmin(admin).subscribe(data => {
+        if (data.success) {
+          this.authService.storeAdminData(data.token, data.admin);
+          this.router.navigate(['/app-primer-piso']);
+        } else {
+          this.flashMessage.show('Verifique que la información entrada sea correcta', { cssClass: 'alert-danger', timeout: 5000 });
+          this.router.navigate(['/']);
+        }
+      });
+    }
   }
 }

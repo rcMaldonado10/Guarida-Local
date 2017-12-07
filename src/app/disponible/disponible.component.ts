@@ -15,12 +15,26 @@ export class DisponibleComponent implements OnInit {
   available: Object[] = [];
   dateDesired;
 
+  private date; // su valor es la fecha de la computadora
+  private day; // el dia que tenga la computadora
+  private month; // el mes que tenga la computadora
+  private year; // el año que tenga la computadora
+
   admin = JSON.parse(localStorage.getItem('admin'));
 
   constructor(private reservasService: ReservasService, private authService: AuthService) {
+    this.day = (new Date().getDate()).toString(); // Verifica la fecha que de el dia correcto el 4 de diciembre dio el 5.
+    console.log(this.day + 'sin editar');
+    if (+(this.day) < 10) {
+      this.day = this.modifiedDay(this.day);
+    }
+    this.month = +(new Date().getMonth().toString()) + 1;
+    this.year = new Date().getFullYear().toString();
+    this.date = this.year + '-' + this.month + '-' + this.day;
+    this.dateDesired  = this.date;
     // recibo las reservas para buscar a que horas hay reserva y a
     // partir de hay busco las horas en la que no hay reserva
-    this.reservasService.getReservas().subscribe(reservas => {
+    this.reservasService.getReservationsByDate(this.dateDesired).subscribe(reservas => {
       this.reservas = reservas;
     });
   }
@@ -34,51 +48,52 @@ export class DisponibleComponent implements OnInit {
   // disponible desde el "startingLimit" y el "endingLimit".
 
   search() {
-    var resHour; // Toma la primera reserva que hay en la coleccion de reserva
-    var nextResHour; // Toma la proxima reserva de la coleccion
-    var floor = "1"; // Indica el piso en el que estamos
-    var room = this.getFloorAndRoom(floor); // Devuelve cuantos salones hay dependiendo de el piso
-    var roomRes; // Recibe un arreglo en donde el piso, el salon y la fecha de reservas es el mismo
-    var flag = -2; // Determina cuantas veces el loop Megalodon va a correr debido a que hay 3 pisos. El loop va a correr 3 veces ya que termina cuando llegue a cero.
-    var floorAndRoom;
-    var nextFloorAndRoom;
-    var primerDigito; // obtiene el primer digito de la primera reserva en el arreglo
-    var segundoDigito; // obtiene el segundo digito de la primer reserva en el arreglo
-    var diff; // Diferencia de las reservas, si hay diferencia entonces hay un tiempo disponible
-    var startingLimit = '8:00'; // Limite en donde empiezan las reservas
-    var endingLimit = '21:00'; // Limite en donde terminan las reservas
+    let resHour; // Toma la primera reserva que hay en la coleccion de reserva
+    let nextResHour; // Toma la proxima reserva de la coleccion
+    let floor = '1'; // Indica el piso en el que estamos
+    let room = this.getFloorAndRoom(floor); // Devuelve cuantos salones hay dependiendo de el piso
+    let roomRes; // Recibe un arreglo en donde el piso, el salon y la fecha de reservas es el mismo
+    let flag = -2; /* Determina cuantas veces el loop Megalodon va a correr debido a que hay 3 pisos. El loop va a correr 3 veces ya que 
+                  termina cuando llegue a cero.*/
+    let floorAndRoom;
+    let nextFloorAndRoom;
+    let primerDigito; // obtiene el primer digito de la primera reserva en el arreglo
+    let segundoDigito; // obtiene el segundo digito de la primer reserva en el arreglo
+    let diff; // Diferencia de las reservas, si hay diferencia entonces hay un tiempo disponible
+    const startingLimit = '8:00'; // Limite en donde empiezan las reservas
+    const endingLimit = '21:00'; // Limite en donde terminan las reservas
 
     if (this.available !== undefined) {
         this.available.splice(0);
     }
 
-    for (var j = 0; j < room.length; j++) {
+    for (let j = 0; j < room.length; j++) {
       roomRes = this.sortByRoom(room[j], floor);
       if (roomRes[j] === undefined) {
         // console.log("nada");
         this.available.push({
-          "salon": room[j],
-          "piso": floor,
-          "content": "algo",
-          "timeAvailable": startingLimit + " - " + endingLimit,
-          "status": "Crear"
+          'piso': floor,
+          'salon': room[j],
+          'content': 'algo',
+          'timeAvailable': startingLimit + ' - ' + endingLimit,
+          'status': 'Crear'
         });
       }
       // Loop Llamado Megalodon. Aqui es donde esta la carne de como se logran las busquedas de las reservas
       // buscando por el piso y por el salon de cada reserva.
-      for (var i = 0; i < roomRes.length - 1; i++) {
+      for (let i = 0; i < roomRes.length - 1; i++) {
         // En estas dos lineas de codigo verifico que el piso y el salon de una reserva sea el mismo
         // para entonces tomar las reservas de eso salones
-        floorAndRoom = roomRes[i].piso == floor && roomRes[i].numSalon == room[j];
-        nextFloorAndRoom = roomRes[i + 1].piso == floor && roomRes[i + 1].numSalon == room[j];
+        floorAndRoom = roomRes[i].piso === floor && roomRes[i].numSalon === room[j];
+        nextFloorAndRoom = roomRes[i + 1].piso === floor && roomRes[i + 1].numSalon === room[j];
 
         if (floorAndRoom) {
-          primerDigito = roomRes[i].horaSalida.charAt(0);//Tomo el primer digito de la hora
-          segundoDigito = roomRes[i].horaSalida.charAt(1);//Tomo el segundo digito de la hora
+          primerDigito = roomRes[i].horaSalida.charAt(0); // Tomo el primer digito de la hora
+          segundoDigito = roomRes[i].horaSalida.charAt(1); // Tomo el segundo digito de la hora
 
           // resHour toma la hora de salida de una reserva para entonces compararla
           // con la hora de la proxima reserva
-          resHour = +(primerDigito + segundoDigito);//De string los convierto a number
+          resHour = +(primerDigito + segundoDigito); // De string los convierto a number
         }
 
         if (nextFloorAndRoom) {
@@ -91,44 +106,44 @@ export class DisponibleComponent implements OnInit {
 
         if (floorAndRoom === true && nextFloorAndRoom === true) {
           diff = resHour - nextResHour;
-          console.log(resHour + "resHour");
-          console.log(nextResHour + "nextResHour");
-          console.log(diff + "diff");
+          console.log(resHour + 'resHour');
+          console.log(nextResHour + 'nextResHour');
+          console.log(diff + 'diff');
           // Si la resta de diff es positivo entra al if para calcular los minutos
             if (diff > 0) {
-            var tercerDigito = roomRes[i].horaSalida.charAt(3);//Primer minuto de la hora de salida de la reserva
-            var cuartoDigito = roomRes[i].horaSalida.charAt(4);//Segundo minuto de la hora de salida de la reserva
+            var tercerDigito = roomRes[i].horaSalida.charAt(3); // Primer minuto de la hora de salida de la reserva
+            var cuartoDigito = roomRes[i].horaSalida.charAt(4); // Segundo minuto de la hora de salida de la reserva
 
-            var nextTercerDigito = roomRes[i + 1].horaEntrada.charAt(3);//Primer minuto de la hora de entrada de la proxima reserva
-            var nextCuartoDigito = roomRes[i + 1].horaEntrada.charAt(4);//Segundo minuto de la hora de entrada de la proxima reserva
+            var nextTercerDigito = roomRes[i + 1].horaEntrada.charAt(3); // Primer minuto de la hora de entrada de la proxima reserva
+            var nextCuartoDigito = roomRes[i + 1].horaEntrada.charAt(4); // Segundo minuto de la hora de entrada de la proxima reserva
 
             var minutosInicial = (+(tercerDigito + cuartoDigito)) + 1;
             var minutosFinal = (+(nextTercerDigito + nextCuartoDigito)) - 1;
             if (minutosInicial < 10 && minutosFinal < 10) {
               var minutoStr = this.setMinutes(minutosInicial);
               var minutoFinalStr = this.setMinutes(minutosFinal);
-              var timeInterval = primerDigito + segundoDigito + ":" + minutoStr + " - " +
-                nextPrimerDigito + nextSegundoDigito + ":" + minutoFinalStr;
-              console.log(timeInterval)
+              var timeInterval = primerDigito + segundoDigito + ':' + minutoStr + ' - ' +
+                nextPrimerDigito + nextSegundoDigito + ':' + minutoFinalStr;
+              console.log(timeInterval);
             } else if (minutosInicial < 10) {
-              var minutoStr = this.setMinutes(minutosInicial);
-              var timeInterval = primerDigito + segundoDigito + ":" + minutoStr + " - " +
-                nextPrimerDigito + nextSegundoDigito + ":" + minutosFinal;
-              console.log(timeInterval)
+              let minutoStr = this.setMinutes(minutosInicial);
+              let timeInterval = primerDigito + segundoDigito + ':' + minutoStr + ' - ' +
+                nextPrimerDigito + nextSegundoDigito + ':' + minutosFinal;
+              console.log(timeInterval);
             } else if (minutosFinal < 10) {
-              var minutoFinalStr = this.setMinutes(minutosFinal);
-              var timeInterval = primerDigito + segundoDigito + ":" + minutosInicial + " - " +
-                nextPrimerDigito + nextSegundoDigito + ":" + minutoFinalStr;
+              let minutoFinalStr = this.setMinutes(minutosFinal);
+              let timeInterval = primerDigito + segundoDigito + ':' + minutosInicial + ' - ' +
+                nextPrimerDigito + nextSegundoDigito + ':' + minutoFinalStr;
             } else {
-              var timeInterval = primerDigito + segundoDigito + ":" + minutosInicial + " - " +
-                nextPrimerDigito + nextSegundoDigito + ":" + minutosFinal;
+              let timeInterval = primerDigito + segundoDigito + ':' + minutosInicial + ' - ' +
+                nextPrimerDigito + nextSegundoDigito + ':' + minutosFinal;
             }
             this.available.push({
-              "salon": roomRes[i].numSalon,
-              "piso": roomRes[i].piso,
-              "content": "algo",
-              "timeAvailable": timeInterval,
-              "status": "Crear"
+              'piso': roomRes[i].piso,
+              'salon': roomRes[i].numSalon,
+              'content': 'algo',
+              'timeAvailable': timeInterval,
+              'status': 'Crear'
             });
             // Si la resta de diff es negativa entra a este if para calcular los minutos
           } else if (diff < 0) {
@@ -159,8 +174,8 @@ export class DisponibleComponent implements OnInit {
               var timeIntervalFinal = nextPrimerDigito + nextSegundoDigito + ":" + minutosFinal;
             }
             this.available.push({
-              'salon': roomRes[i].numSalon,
               'piso': roomRes[i].piso,
+              'salon': roomRes[i].numSalon,
               'content': 'algo',
               'timeAvailable': (timeIntervalInical + '-' + timeIntervalFinal),
               'status': 'Crear'
@@ -198,21 +213,21 @@ export class DisponibleComponent implements OnInit {
                 nextPrimerDigito + nextSegundoDigito + ":" + minutosFinal;
             }
             this.available.push({
-              "salon": roomRes[i].numSalon,
-              "piso": roomRes[i].piso,
-              "content": "algo",
-              "timeAvailable": timeInterval,
-              "status": "Crear"
+              'piso': roomRes[i].piso,
+              'salon': roomRes[i].numSalon,
+              'content': 'algo',
+              'timeAvailable': timeInterval,
+              'status': 'Crear'
             });
           }
         }
       }
-      //Este if se utiliza para cambiar de piso y buscar por los salones de ese otro piso
-      if (j == room.length - 1) {
-        if(floor == "1") {
-          floor = "2";
-        } else if(floor == "2"){
-          floor = "3 (Centro de Aprendizaje)";
+      // Este if se utiliza para cambiar de piso y buscar por los salones de ese otro piso
+      if (j === room.length - 1) {
+        if (floor === '1') {
+          floor = '2';
+        } else if (floor === '2') {
+          floor = '3 (Centro de Aprendizaje)';
         }
         room = this.getFloorAndRoom(floor);
         if (flag != 0) {
@@ -223,18 +238,18 @@ export class DisponibleComponent implements OnInit {
     }
   }
 
-  //Esta funcion recibe el piso en el que se este buscando reservas
-  //y devuelve la cantidad de salones de estudio que hay en ese piso
+  // Esta funcion recibe el piso en el que se este buscando reservas
+  // y devuelve la cantidad de salones de estudio que hay en ese piso
   getFloorAndRoom(floor: string) {
-    var floorAndRoom = {
-      floor1: ["1", "2", "3", "4", "5", "6", "7"],
-      floor2: ["1", "2", "3", "4", "5", "6"],
-      floor3: ["1","2","3","4"]
-    }
+    const floorAndRoom = {
+      floor1: ['1', '2', '3', '4', '5', '6', '7'],
+      floor2: ['1', '2', '3', '4', '5', '6'],
+      floor3: ['1', '2', '3', '4']
+    };
 
-    if (floor === "1") {
+    if (floor === '1') {
       return floorAndRoom.floor1;
-    } else if(floor === "2"){
+    } else if (floor === '2') {
       return floorAndRoom.floor2;
     } else {
       return floorAndRoom.floor3;
@@ -246,14 +261,14 @@ export class DisponibleComponent implements OnInit {
   // organiza las reservas por la hora, es decir, de reservas que son
   // en la mañana hasta por la noche
   sortByRoom(room: string, floor: string) {
-    var resByRoom: any[] = [];
+    const resByRoom: any[] = [];
     let firstResHour: number; // Recive la hora de la reserva en el arreglo
     let nextFirstResHour: number; // Recive la hora de la siguiente reserva
     let minutesRes: number; // Los minutos de la primera reserva
     let nextMinutesRes: number; // los minutos de la segunda reserva
-    var diffHours: number;
-    var diffMinutes: number;
-    for (var i = 0; i < this.reservas.length; i++) {
+    let diffHours: number;
+    let diffMinutes: number;
+    for (let i = 0; i < this.reservas.length; i++) {
       if (this.reservas[i].numSalon === room && this.reservas[i].piso === floor && this.reservas[i].fecha === this.dateDesired) {
         resByRoom.push(this.reservas[i]);
       }
@@ -273,7 +288,7 @@ export class DisponibleComponent implements OnInit {
             minutesRes = +(resByRoom[j].horaSalida.charAt(3) + resByRoom[j].horaSalida.charAt(4));
             nextMinutesRes = +(resByRoom[j + 1].horaEntrada.charAt(3) + resByRoom[j + 1].horaEntrada.charAt(4));
             diffMinutes = minutesRes - nextMinutesRes;
-            console.log(diffMinutes + "minutos");
+            console.log(diffMinutes + 'minutos');
             if (diffMinutes > 0) {
               [resByRoom[j], resByRoom[j + 1]] = [resByRoom[j + 1], resByRoom[j]];
               swapped = true;
@@ -290,50 +305,84 @@ export class DisponibleComponent implements OnInit {
   // Funcion setea los minutos que sean de 0 a 9 un string y el string es el numero de dos digitos para que se vea
   // como que es parte de la hora que se presenta
   setMinutes(minutoStr) {
-    var minuto;
+    let minuto;
     switch (minutoStr) {
       case 0: {
-        minuto = "00";
+        minuto = '00';
         break;
       }
       case 1: {
-        minuto = "01";
+        minuto = '01';
         break;
       }
       case 2: {
-        minuto = "02";
+        minuto = '02';
         break;
       }
       case 3: {
-        minuto = "03";
+        minuto = '03';
         break;
       }
       case 4: {
-        minuto = "04";
+        minuto = '04';
         break;
       }
       case 5: {
-        minuto = "05";
+        minuto = '05';
         break;
       }
       case 6: {
-        minuto = "06";
+        minuto = '06';
         break;
       }
       case 7: {
-        minuto = "07";
+        minuto = '07';
         break;
       }
       case 8: {
-        minuto = "08";
+        minuto = '08';
         break;
       }
       case 9: {
-        minuto = "09";
+        minuto = '09';
         break;
       }
     }
     return minuto;
+  }
+
+  // Funcion que modifica el dia para que pueda encontrar reservas en la base de datos
+  modifiedDay(day) {
+    switch (day) {
+      case '1':
+        day = '01';
+        break;
+      case '2':
+        day = '02';
+        break;
+      case '3':
+        day = '03';
+        break;
+      case '4':
+        day = '04';
+        break;
+      case '5':
+        day = '05';
+        break;
+      case '6':
+        day = '06';
+        break;
+      case '7':
+        day = '07';
+        break;
+      case '8':
+        day = '08';
+        break;
+      case '9':
+        day = '09';
+        break;
+    }
+    return day;
   }
 
   onLogout() {
