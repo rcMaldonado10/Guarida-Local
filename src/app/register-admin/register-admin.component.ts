@@ -51,7 +51,7 @@ export class RegisterAdminComponent implements OnInit {
         console.log(data.success);
         if (data.success) {
           this.flashMessage.show('El administrador ya esta registrado', { cssClass: 'alert-success', timeout: 3000 });
-          this.router.navigate(['/']);
+          // this.router.navigate(['/']);
         } else {
           this.flashMessage.show('Error al entar el administrador', { cssClass: 'alert-danger', timeout: 3000 });
         }
