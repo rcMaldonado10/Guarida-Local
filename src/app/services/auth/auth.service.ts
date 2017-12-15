@@ -14,14 +14,14 @@ export class AuthService {
   registerAdmin(admin) {
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
-    return this.http.post('http://localhost:3000/users/register', admin, {headers: headers})
+    return this.http.post('http://localhost:3000/admin/register', admin, {headers: headers})
       .map(res => res.json());
   }
 
   authenticateAdmin(admin) {
     const headers = new Headers();
     headers.append('Content-Type', 'application/json');
-    return this.http.post('http://localhost:3000/users/authenticate', admin, { headers: headers })
+    return this.http.post('http://localhost:3000/admin/authenticate', admin, { headers: headers })
       .map(res => res.json());
   }
 
@@ -30,7 +30,7 @@ export class AuthService {
     this.loadToken();
     headers.append('Authorization', this.authToken);
     headers.append('Content-Type', 'application/json');
-    return this.http.get('http://localhost:3000/users/profile', { headers: headers })
+    return this.http.get('http://localhost:3000/admin/profile', { headers: headers })
       .map(res => res.json());
   }
 
