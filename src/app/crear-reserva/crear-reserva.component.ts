@@ -59,6 +59,7 @@ export class CrearReservaComponent implements OnInit {
     let allGoodFlagID: boolean;
     let allGoodFlagQuantity: boolean;
     let allGoodFlagTime: boolean;
+    let allGoodFlagHourLimit: boolean;
     const startTime = this.enteredHour + ' ' + this.enteredMeridiem;
     const endingTime = this.exitHour + ' ' + this.exitMeridiem;
     const startTimeMilitary = this.changeToMilitary(startTime);
@@ -106,7 +107,16 @@ export class CrearReservaComponent implements OnInit {
       } else {
         allGoodFlagQuantity = true;
       }
-
+      if ((+startTimeMilitary) >= 8 && (+endingTimeMilitary) <= 21) {
+        allGoodFlagHourLimit = true;
+        if ((+endingTimeMilitary) === 21 && (+this.exitMinutes) > 0 ) {
+          allGoodFlagHourLimit = false;
+          this.flashMessage.show('Los horarios de reserva son de 8:00 AM - 9:00 PM', {cssClass: 'alert-danger', timeout: 5000});
+        }
+      } else {
+        allGoodFlagHourLimit = false;
+        this.flashMessage.show('Los horarios de reserva son de 8:00 AM - 9:00 PM', { cssClass: 'alert-danger', timeout: 5000 });
+      }
       if (militaryTimeDiff <= 2 && militaryTimeDiff > 0) {
         hourToEnter = startTimeMilitary + ':' + this.enteredMinutes;
         hourToExit = endingTimeMilitary + ':' + this.exitMinutes;
@@ -135,11 +145,11 @@ export class CrearReservaComponent implements OnInit {
           this.flashMessage.show('😑  Por favor elige un tiempo de reseva valido', { cssClass: 'alert-danger', timeout: 5000 });
           allGoodFlagTime = false;
         }
-
       } else {
         this.flashMessage.show('La hora entrada no cumple con el limite de dos horas', { cssClass: 'alert-danger', timeout: 5000 });
       }
-      if (allGoodFlagID === true && allGoodFlagQuantity === true && allGoodFlagTime === true) {
+
+      if (allGoodFlagID === true && allGoodFlagQuantity === true && allGoodFlagTime === true && allGoodFlagHourLimit === true) {
         const reservation = {
           'name': this.name,
           'id': this.id,
